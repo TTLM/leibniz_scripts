@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from PyPDF2 import PdfFileReader, PdfFileWriter
+from PyPDF2 import PdfReader, PdfWriter
 import os
 import json
 import time
@@ -9,7 +9,7 @@ import time
 class DocScraper:
     def __init__(self, config):
         self.config = config
-        self.driver = webdriver.Chrome()
+        # self.driver = webdriver.Chrome()
         self.urls = []
 
     def load(self, url_list):
@@ -18,11 +18,7 @@ class DocScraper:
             self.urls = raw_urls['urls']
         return self.urls
 
-    # def download_single_doc(self, url):
-    #     self.driver.get(url)
-    #     soup = BeautifulSoup(self.driver.page_source, 'html.parser')
-
-    # def download_one_page(self):
+    # def download_page(self):
     #     None
 
     def download_pdf(self, url, save_path):
@@ -59,30 +55,38 @@ class DocScraper:
         save_path = os.path.join(self.config.DOWNLOAD_FOLDER, title)
         if not os.path.exists(save_path):
             os.makedirs(save_path)
-        save_path_whole = os.path.join(save_path, title + ".pdf")
+        save_path_whole = os.path.join(save_path, f'{title}.pdf')
         self.download_pdf(pdf_links['whole_work'], save_path_whole)
 
     def scrape_all_docs(self, urls):
         for url in urls:
             self.scrape_doc(url)
-            print("Downloaded " + url)
+            # print("Downloaded " + url)
+            print(f'Downloaded {url}')
             time.sleep(1)
 
-    def split_pages(self, data_folder, filename):
-        pdf_path = os.path.join(data_folder, filename, filename + ".pdf")
+    def split_pages(self, source_folder, filename, out_folder):
+        # Assuming that each file is in a folder with the same name as the file
+        pdf_path = os.path.join(source_folder, filename, f'{filename}.pdf')
         if os.path.exists(pdf_path):
-            pdf = PdfFileReader(pdf_path)
-            for page in range(len(pdf.pages)):
-                writer = PdfFileWriter()
-                page_filename=filename + page + ".pdf"
-                with open(page_filename, 'wb') as f:
+            pdf = PdfReader(pdf_path)
+            for page_num in range(len(pdf.pages)):
+                writer = PdfWriter()
+                writer.add_page(pdf.pages[page_num])
+                # page_filename=filename + page + ".pdf"
+                page_filename = f'{filename}_{page_num}.pdf'
+                out_path = os.path.join(out_folder, filename)
+                if not os.path.exists(out_path):
+                    os.makedirs(out_path)
+                out_filename = os.path.join(out_path, page_filename)
+                with open(out_filename, 'wb') as f:
                     writer.write(f)
-            print('Created: {}'.format(page_filename))
+            print(f'Paginated: {filename}')
 
-    def split_all(self, data_folder):
-        dir_list = os.listdir(data_folder)
+    def split_all(self, source_folder, out_folder):
+        dir_list = os.listdir(source_folder)
         for dir in dir_list:
-            self.split_pages(data_folder, dir)
+            self.split_pages(source_folder, dir, out_folder)
 
 
 

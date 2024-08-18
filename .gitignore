@@ -1,2 +1,4 @@
-# ignore all downloaded pdfs
+# ignore all  pfs
 downloads/
+extraneous/
+pages/
