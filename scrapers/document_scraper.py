@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from PyPDF2 import PdfFileReader, PdfFileWriter
 import os
 import json
 import time
@@ -66,6 +67,23 @@ class DocScraper:
             self.scrape_doc(url)
             print("Downloaded " + url)
             time.sleep(1)
+
+    def split_pages(self, data_folder, filename):
+        pdf_path = os.path.join(data_folder, filename, filename + ".pdf")
+        if os.path.exists(pdf_path):
+            pdf = PdfFileReader(pdf_path)
+            for page in range(len(pdf.pages)):
+                writer = PdfFileWriter()
+                page_filename=filename + page + ".pdf"
+                with open(page_filename, 'wb') as f:
+                    writer.write(f)
+            print('Created: {}'.format(page_filename))
+
+    def split_all(self, data_folder):
+        dir_list = os.listdir(data_folder)
+        for dir in dir_list:
+            self.split_pages(data_folder, dir)
+
 
 
 

@@ -5,4 +5,4 @@ class Config:
     JSON_FILE = "data/urls.json"
     # DRIVER_PATH = "/path/to/chromedriver"
     SEARCH_BOX_NAME = "tx_dlf[query]"
-    PDF_LINK_TEXT = "Download the entire work"
+    # PDF_LINK_TEXT = "Download the entire work"

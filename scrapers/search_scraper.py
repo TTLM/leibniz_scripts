@@ -11,7 +11,6 @@ class SearchScraper:
         self.config = config
         self.driver = webdriver.Chrome()
         self.urls = []
-        # self.metadata = []
         
     def search(self, query):
         self.driver.get(self.config.SEARCH_PAGE)
@@ -45,21 +44,17 @@ class SearchScraper:
 
         # Handle pagination
         next_icon = soup.find('i', class_='icon-chevron-right')
-        # for i in range(3):
         while (next_icon):
             next_button = next_icon.find_previous('a')
-            # next_button_url = next_button['href']
             next_button_url = self.config.BASE_URL + next_button['href']
             self.driver.get(next_button_url)
             time.sleep(3)
             soup = BeautifulSoup(self.driver.page_source, 'html.parser')
             results = soup.find_all('a', href=pattern)
             self.urls.extend([link['href'] for link in results])
-            # self.metadata.extend([link.get_text() for link in results])
             next_icon = soup.find('i', class_='icon-chevron-right')
 
         with open(self.config.JSON_FILE, 'w') as f:
-            # json.dump({"urls": self.urls, "metadata": self.metadata}, f, indent=4)
             json.dump({"urls": self.urls}, f, indent=4)
 
         # with open("data/search.html", 'w') as f2:
